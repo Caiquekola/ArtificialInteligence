@@ -41,3 +41,30 @@ pai.indice = 0
 pai.distancia_percorrida = 0
 estados = []
 final = Node() #estado final para retornar
+
+estados.append(pai)
+objetivo = len(dist)
+while len(estados) > 0:
+    atual = get_min(estados)
+    if(atual.indice == objetivo):
+        atual.caminho.apende(atual.indice)
+        final = atual
+        break
+    for vizinho_indice in range(len(tab[atual.indice])):
+        custo_aresta = tab[atual.indice][vizinho_indice]
+
+        if custo_aresta > 0:
+            filho = Node()
+            filho.indice = vizinho_indice
+            filho.distancia_percorrida = atual.distancia_percorrida + custo_aresta
+            filho.fe = funcao_heuristica(dist, atual.distancia_percorrida, custo_aresta,vizinho_indice)
+            filho.caminho = copy.deepcopy(atual.caminho)
+            filho.caminho.append(atual.indice)
+
+            estados.append(filho)
+if final.indice != -1: # Se o índice mudou, é porque encontrou o caminho
+    print("--- Busca Concluída ---")
+    print(f"Melhor caminho: {final.caminho}")
+    print(f"Distância total percorrida: {final.distancia_percorrida}")
+else:
+    print("Nenhum caminho foi encontrado para o destino.")
