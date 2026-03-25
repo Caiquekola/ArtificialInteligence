@@ -1,0 +1,114 @@
+import java.util.*;
+
+// 1. Classe que representa um Nó no Grafo/Grid
+class Node implements Comparable<Node> {
+    int x, y;
+    int g; // Custo do início até aqui
+    int h; // Heurística (distância até o objetivo)
+    int f; // g + h
+    Node parent;
+
+    public Node(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.f = 0;
+        this.g = 0;
+        this.h = 0;
+    }
+
+    @Override
+    public int compareTo(Node other) {
+        return Integer.compare(this.f, other.f);
+    }
+}
+
+public class AStar {
+    private static final int DIAGONAL_COST = 14;
+    private static final int STRAIGHT_COST = 10;
+
+    public List<Node> findPath(int[][] grid, int startX, int startY, int endX, int endY) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        PriorityQueue<Node> openList = new PriorityQueue<>();
+        boolean[][] closedList = new boolean[rows][cols];
+        Node[][] nodes = new Node[rows][cols];
+
+        Node startNode = new Node(startX, startY);
+        Node targetNode = new Node(endX, endY);
+
+        nodes[startX][startY] = startNode;
+        openList.add(startNode);
+
+        while (!openList.isEmpty()) {
+            Node current = openList.poll();
+            closedList[current.x][current.y] = true;
+
+            // Objetivo alcançado
+            if (current.x == targetNode.x && current.y == targetNode.y) {
+                return reconstructPath(current);
+            }
+
+            // Explorar vizinhos
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) continue;
+
+                    int newX = current.x + i;
+                    int newY = current.y + j;
+
+                    // Verificar limites e obstáculos (1 = obstáculo)
+                    if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && grid[newX][newY] == 0 && !closedList[newX][newY]) {
+                        int newG = current.g + (i == 0 || j == 0 ? STRAIGHT_COST : DIAGONAL_COST);
+                        
+                        Node neighbor = nodes[newX][newY];
+                        if (neighbor == null || newG < neighbor.g) {
+                            if (neighbor == null) neighbor = new Node(newX, newY);
+                            neighbor.parent = current;
+                            neighbor.g = newG;
+                            neighbor.h = calculateHeuristic(newX, newY, endX, endY);
+                            neighbor.f = neighbor.g + neighbor.h;
+                            nodes[newX][newY] = neighbor;
+
+                            if (!openList.contains(neighbor)) {
+                                openList.add(neighbor);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(); // Nenhum caminho encontrado
+    }
+
+    // Heurística de Distância Manhattan ou Euclidiana (aqui usando Manhattan simplificada)
+    private int calculateHeuristic(int x1, int y1, int x2, int y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
+    private List<Node> reconstructPath(Node node) {
+        List<Node> path = new ArrayList<>();
+        while (node != null) {
+            path.add(node);
+            node = node.parent;
+        }
+        Collections.reverse(path);
+        return path;
+    }
+
+    public static void main(String[] args) {
+        int[][] grid = {
+            {0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 0},
+            {0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 0},
+            {0, 0, 0, 0, 0}
+        };
+        AStar aStar = new AStar();
+        List<Node> path = aStar.findPath(grid, 0, 0, 4, 4);
+
+        for (Node node : path) {
+            System.out.println("(" + node.x + ", " + node.y + ")");
+        }
+    }
+}
