@@ -1,4 +1,3 @@
-
 usuario(carlos).
 usuario(joana).
 usuario(felisberto).
@@ -41,6 +40,9 @@ curtiu(agnes, wilson).
 curtiu(laura, xbox).
 curtiu(laura, playstation).
 
-talvez_voce_conheca(X, Y) :- ehamigo(X,Z),ehamigo(Y,Z), X \= Y, \+ ehamigo(X,Y).
+talvez_voce_conheca(X, Y) :- usuario(X),usuario(Y),ehamigo(X,Z),ehamigo(Y,Z), X \= Y, \+ ehamigo(X,Y).
 
 recomendamos(X,Y) :- curtiu(Y,X);comprou(Z,X),ehamigo(Y,Z).
+
+super_recomendamos(X, Y) :- produto(X), usuario(Y), 
+    (   (   ehamigo(Y,Z),comprou(Z,X))>
